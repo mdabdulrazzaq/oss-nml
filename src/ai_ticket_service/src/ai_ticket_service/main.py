@@ -170,6 +170,8 @@ def _format_ticket_response(
     """Format ticket results via AI to achieve a consistent layout."""
     if ticket_result is None:
         return None
+    if isinstance(ticket_result, dict) and ticket_result.get("type") in {"chat", "unknown"}:
+        return str(ticket_result.get("message", ""))
 
     if ai_result is None:
         ai_context: dict[str, Any] = {"intent": "formatting"}
@@ -329,12 +331,6 @@ def _process_command(request: CommandRequest) -> CommandResponse:
         backend_status=backend_status,
         formatted_response=formatted_response,
     )
-
-
-@app.post("/command")
-def command(request: CommandRequest) -> CommandResponse:
-    """Process natural language into ticket operations with backend selection."""
-    return _process_command(request)
 
 
 def _parse_status(status_str: str | None) -> TicketStatus | None:
